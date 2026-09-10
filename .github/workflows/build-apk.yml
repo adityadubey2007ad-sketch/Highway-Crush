@@ -1,0 +1,39 @@
+name: Build Highway Crush APK
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Download Gradle
+        run: |
+          wget -q https://services.gradle.org/distributions/gradle-8.10.2-bin.zip
+          unzip -q gradle-8.10.2-bin.zip
+          echo "$PWD/gradle-8.10.2/bin" >> $GITHUB_PATH
+
+      - name: Extract project
+        run: |
+          mkdir build_project
+          unzip -q Highway_Crush_Android_Project_READY.zip -d build_project
+
+      - name: Build APK
+        working-directory: build_project
+        run: gradle :app:assembleDebug --no-daemon
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Highway-Crush-APK
+          path: build_project/app/build/outputs/apk/debug/*.apk
